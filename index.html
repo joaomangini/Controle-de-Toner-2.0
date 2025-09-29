@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventário de TI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <h1>Inventário de TI — Hospital</h1>
+        <div class="header-actions">
+            <button id="btnTheme" class="btn btn-theme" title="Alternar tema">🌙</button>
+            <button id="btnExport" class="btn">Exportar CSV</button>
+            <button id="btnBackup" class="btn btn-primary">Backup</button>
+            <button id="btnRestore" class="btn">Restaurar</button>
+            <button id="btnClear" class="btn btn-red">Limpar Dados</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="panel full-width">
+            <h2>Painel de Resumo</h2>
+            <div class="dashboard">
+                <div class="card">
+                    <h3 id="totalItems">0</h3>
+                    <p>Total de Itens</p>
+                </div>
+                <div class="card">
+                    <h3 id="totalImpressoras">0</h3>
+                    <p>Impressoras</p>
+                </div>
+                <div class="card">
+                    <h3 id="tonerEstoque">0</h3>
+                    <p>Toners em Estoque</p>
+                </div>
+                <div class="card card-warn">
+                    <h3 id="totalManutencao">0</h3>
+                    <p>Em Manutenção</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="panel-cadastro">
+            <h2 id="formTitle">Cadastrar Equipamento</h2>
+            <form id="formAdd">
+                <div class="row">
+                    <label>Tipo
+                        <select id="tipo" required>
+                            <option value="">-- Selecione --</option>
+                            <option value="Impressora">Impressora</option>
+                            <option value="Toner">Toner</option>
+                        </select>
+                    </label>
+                    <label>Nº de Série / Modelo
+                        <input id="serie" type="text" placeholder="Identificador único" required>
+                    </label>
+                </div>
+
+                <div id="tonerFields" class="hidden conditional-fields">
+                    <div class="row">
+                        <label>Marca do Toner
+                            <select id="tonerMarca">
+                                <option value="">-- Selecione a Marca --</option>
+                                <option>Ricoh</option>
+                                <option>Kyocera</option>
+                            </select>
+                        </label>
+                        <label>Modelo do Toner
+                            <select id="tonerModelo">
+                                <option value="">-- Selecione o Modelo --</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="impressoraFields" class="hidden conditional-fields">
+                    <div class="row">
+                        <label>Setor
+                            <input id="setor" type="text" placeholder="Ex: Recepção, RH, TI">
+                        </label>
+                        <label>Toner Inicial (Opcional)
+                            <select id="tonerEmUso">
+                                <option value="">-- Nenhum --</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <label>Descrição
+                    <input id="descricao" type="text" placeholder="Ex: Dell Optiplex 3080, Toner TK-1175">
+                </label>
+                <div class="row">
+                    <label>Data Aquisição
+                        <input id="dataAq" type="date">
+                    </label>
+                    <label>Status
+                        <select id="status">
+                            <option>Em uso</option>
+                            <option>Em manutenção</option>
+                            <option>Descartado</option>
+                        </select>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary" id="formSubmitBtn">Adicionar</button>
+                <button type="button" class="btn hidden" id="cancelEditBtn">Cancelar Edição</button>
+            </form>
+        </section>
+
+        <section class="panel full-width" id="panel-inventario">
+            <h2>Inventário</h2>
+            <div class="controls">
+                <input id="search" type="search" placeholder="Pesquisar por tipo, série, setor, marca...">
+                <div class="filter-row">
+                    <select id="filterStatus">
+                        <option value="">Status</option>
+                        <option>Em uso</option>
+                        <option>Instalado</option>
+                        <option>Em manutenção</option>
+                        <option>Descartado</option>
+                    </select>
+                    <select id="filterTipo">
+                        <option value="">Tipo</option>
+                        <option value="Impressora">Impressora</option>
+                        <option value="Toner">Toner</option>
+                    </select>
+                    <div class="date-filter">
+                        <label>De:</label> <input type="date" id="dateFrom">
+                        <label>Até:</label> <input type="date" id="dateTo">
+                        <button id="clearDates" class="btn">Limpar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <th data-sort="tipo">Tipo</th>
+                            <th data-sort="numero_serie">Nº Série</th>
+                            <th data-sort="setor">Setor/Marca</th>
+                            <th>Toner em Uso</th>
+                            <th data-sort="descricao">Descrição</th>
+                            <th data-sort="status">Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel full-width">
+            <h2>Relatório de Atividades</h2>
+            <div class="filter-row">
+                <label>De:</label>
+                <input type="date" id="reportDateFrom">
+                <label>Até:</label>
+                <input type="date" id="reportDateTo">
+                <button id="generateActivityReport" class="btn btn-primary">Gerar Relatório</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <button id="closeModal" class="modal-close">&times;</button>
+            <h3 id="modalTitle">Registrar Manutenção</h3>
+            <form id="formModal">
+                <label>Data
+                    <input id="manData" type="date" required>
+                </label>
+                <label>Observações
+                    <textarea id="manObs" placeholder="Descreva o serviço realizado." required></textarea>
+                </label>
+                <label>Alterar Status para
+                    <select id="manStatus">
+                        <option>Em uso</option>
+                        <option>Em manutenção</option>
+                        <option>Descartado</option>
+                    </select>
+                </label>
+                <div class="modal-actions">
+                    <button type="button" id="btnModalRemove" class="btn btn-red">Remover Equipamento</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="tonerModal" class="modal hidden">
+        <div class="modal-content">
+            <button id="closeTonerModal" class="modal-close">&times;</button>
+            <h3 id="tonerModalTitle">Registrar Troca de Toner</h3>
+            <form id="formTonerModal">
+                <label>Data e Hora da Troca
+                    <input id="tonerDataHora" type="datetime-local" required>
+                </label>
+                <label>Novo Toner a ser Instalado
+                    <select id="novoTonerSelect" required>
+                        <option value="">-- Selecione o novo toner --</option>
+                    </select>
+                </label>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Confirmar Troca</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="confirmModalTitle">Você tem certeza?</h3>
+            <p id="confirmModalText">Esta ação não pode ser desfeita.</p>
+            <div class="modal-actions">
+                <button type="button" id="confirmModalCancel" class="btn">Cancelar</button>
+                <button type="button" id="confirmModalOk" class="btn btn-red">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <footer class="footer">
+        <p>Inventário TI - @desenvolvimento joaoleonardo. Dados salvos localmente</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
